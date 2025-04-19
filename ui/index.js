@@ -1,5 +1,9 @@
 window.addEventListener('DOMContentLoaded', (ev) => {
     init();
+    const refreshE = document.querySelector("#refresh");
+    refreshE.addEventListener("click", (ev)=>{
+        update();
+    });
 });
 
 // sample data
@@ -43,8 +47,10 @@ function cert2tr(cert) {
 
 function certs2table(certs){
     const tableE = document.querySelector("#cert-table");
+    tbodyE = tableE.children[1];
+    tbodyE.innerHTML = "";
     for(let i=0; i<certs.length; i++){
-        tableE.appendChild(cert2tr(certs[i]));
+        tbodyE.appendChild(cert2tr(certs[i]));
     }
     return tableE;
 }
@@ -53,9 +59,8 @@ function certs2csv(certs){
 
 }
 
-function init_ui(data) {
-    const certs = JSON.parse(certsJson);
-    certs2table(certs);
+function update_ui(data) {
+    certs2table(data);
 }
 
 async function fetch_data() {
@@ -63,7 +68,6 @@ async function fetch_data() {
     try {
         const response = await fetch(url);
         const data = await response.json();
-        console.log(data);
         return data;
     } catch (error) {
         console.error("Fetch error:", error);
@@ -71,11 +75,15 @@ async function fetch_data() {
     }
 }
 
-function init() {
-    const data = fetch_data();
+async function update(){
+    const data = await fetch_data();
+    console.log(data);
     if(data == null){
         return;
     }
+    update_ui(data);
+}
 
-    init_ui(data);
+async function init() {
+    update();
 }

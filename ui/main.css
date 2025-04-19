@@ -49,3 +49,7 @@ main {
 .warning {
     background-color: red;
 }
+button {
+    border: 2px solid black;
+    border-radius: 0%;
+}
