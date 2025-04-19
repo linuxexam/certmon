@@ -110,17 +110,43 @@ func (db *DB) GetAllCerts() []*Cert {
 	return nil
 }
 
-func (db *DB) AddCert(host string, port int) {
-
+func (db *DB) AddUser(userId, email string) error {
+	_, err := db.Exec(`INSERT INTO user (id, email)
+				VALUES (?,?)
+				ON CONFLICT(id) DO UPDATE SET
+					email = ?
+	`, userId, email, email)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (db *DB) RemoveCert(host string, port int) {
+func (db *DB) AddCert(addr, dns string) error {
+	_, err := db.Exec(`INSERT INTO cert (addr, dns)
+				VALUES (?,?)`,
+		addr, dns)
 
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (db *DB) AddOwner(host string, port int, userId string) {
-
+func (db *DB) AddUserCert(userId, certAddr, certDNS string) error {
+	db.AddCert(certAddr, certDNS)
+	sql := `
+		INSERT INTO user_cert (user_id, cert_id)
+		VALUES (?,(SELECT id FROM cert WHERE addr = ? and dns = ?))
+	`
+	_, err := db.Exec(sql, userId, certAddr, certDNS)
+	return err
 }
 
-func (db *DB) RemoveOwner(host string, port int, userId string) {
+func (db *DB) DelUserCert(userId, certAddr, certDNS string) error {
+	sql := `DELETE FROM user_cert
+	WHERE user_id = ? AND 
+		cert_id = (SELECT id from cert WHERE addr = ? and dns = ?)`
+	_, err := db.Exec(sql, userId, certAddr, certDNS)
+	return err
 }

@@ -37,7 +37,8 @@ function cert2tr(cert) {
                     <td>${cert.dns}</td>
                     <td>${cert.updateTime}</td>
                     <td>${cert.daysLeft}</td>
-                    <td>${cert.updateStatus}</td>`;
+                    <td>${cert.updateStatus}</td>
+                    <td><button onclick="">delete</button></td>`;
 
     return trE;
 }

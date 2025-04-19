@@ -12,6 +12,34 @@ func TestGetUserCerts(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestAddUser(t *testing.T) {
+	db := InitDB()
+	err := db.AddUser("user02", "user02@gmail.com")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func TestAddUserCert(t *testing.T) {
+	db := InitDB()
+	err := db.AddUserCert("user01", "2.2.2.2:443", "")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(db.GetUserCerts("user01")) != 3 {
+		t.Fail()
+	}
+}
+
+func TestDelUserCert(t *testing.T) {
+	db := InitDB()
+	err := db.DelUserCert("user01", "google.ca:443", "")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func InitDB() *DB {
 	testDB, err := NewDB(":memory:")
 	if err != nil {

@@ -14,6 +14,10 @@ import (
 var UI embed.FS
 var DEBUG = true
 
+func GetCurrentUser() string {
+	return "user01"
+}
+
 func main() {
 	var listen string
 	flag.StringVar(&listen, "listen", ":8080", "listen address and port")
@@ -35,9 +39,27 @@ func main() {
 		}
 	})
 
+	// add a cert for a user
+	http.HandleFunc("GET /add", func(w http.ResponseWriter, r *http.Request) {
+		userId := GetCurrentUser()
+		certAddr := r.URL.Query().Get("certAddr")
+		certDNS := r.URL.Query().Get("certDNS")
+		err := db.AddUserCert(userId, certAddr, certDNS)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+		}
+		w.Write([]byte("good"))
+	})
+
+	// delete a cert for a user
+	http.HandleFunc("GET /delete", func(w http.ResponseWriter, r *http.Request) {
+
+	})
+
+	// get all cert for a user
 	http.HandleFunc("GET /fetch", func(w http.ResponseWriter, r *http.Request) {
 		// get list of certs registered by the current user
-		certs := db.GetUserCerts("user01")
+		certs := db.GetUserCerts(GetCurrentUser())
 		// connect to verify each cert
 		var wg sync.WaitGroup
 		wg.Add(len(certs))
