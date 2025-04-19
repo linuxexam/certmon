@@ -10,22 +10,18 @@ window.addEventListener('DOMContentLoaded', (ev) => {
 const certsJson = `
 [
     {
-        "host": "1.2.3.4",
-        "port": 443,
+        "addr": "google.ca:443",
+        "dns": "",
         "updateTime": "2025-1-10",
-        "daysLeft": 30
+        "daysLeft": 30,
+        "updateStatus": "ok",
     },
     {
-        "host": "google.com",
-        "port": 123,
-        "updateTime": "2025-10-10",
-        "daysLeft": 3
-    },
-    {
-        "host": "baidu.com",
-        "port": 443,
+        "addr": "1.2.3.4:443",
+        "dns": "myexample.com",
         "updateTime": "2025-20-10",
-        "daysLeft": 7 
+        "daysLeft": 7,
+        "updateStatus": "failed to connection."
     }
 ]
 `;
@@ -37,8 +33,8 @@ function cert2tr(cert) {
     } else if (cert.daysLeft <= 7) {
         trE.className = "caution";
     }
-    trE.innerHTML = `<td>${cert.host}</td>
-                    <td>${cert.port}</td>
+    trE.innerHTML = `<td>${cert.addr}</td>
+                    <td>${cert.dns}</td>
                     <td>${cert.updateTime}</td>
                     <td>${cert.daysLeft}</td>
                     <td>${cert.updateStatus}</td>`;

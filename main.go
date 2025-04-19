@@ -19,6 +19,13 @@ func main() {
 	flag.StringVar(&listen, "listen", ":8080", "listen address and port")
 	flag.Parse()
 
+	// db
+	db, err := NewDB("./certmon.sqlite")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// web
 	http.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		if DEBUG {
 			http.FileServer(http.Dir("ui")).ServeHTTP(w, r)
@@ -30,28 +37,7 @@ func main() {
 
 	http.HandleFunc("GET /fetch", func(w http.ResponseWriter, r *http.Request) {
 		// get list of certs registered by the current user
-		certs := []*Cert{
-			{
-				Host: "google.ca",
-				Port: 443,
-			},
-			{
-				Host: "ww.utoronto.ca",
-				Port: 443,
-			},
-			{
-				Host: "idpz.utorauth.utoronto.ca",
-				Port: 443,
-			},
-			{
-				Host: "www2.csdn.net",
-				Port: 442,
-			},
-			{
-				Host: "www.csdn.net",
-				Port: 443,
-			},
-		}
+		certs := db.GetUserCerts("user01")
 		// connect to verify each cert
 		var wg sync.WaitGroup
 		wg.Add(len(certs))

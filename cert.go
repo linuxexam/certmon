@@ -3,20 +3,19 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"time"
 )
 
 type Cert struct {
-	Host         string   `json:"host"`
-	Port         int      `json:"port"`
+	Addr         string   `json:"addr"`
+	DNS          string   `json:"dns"` // for customized DNS resolution, optional
 	UpdateTime   JSONTime `json:"updateTime"`
 	DaysLeft     int      `json:"daysLeft"`
 	UpdateStatus string   `json:"updateStatus"`
 }
 
 func (c *Cert) Update() {
-	cert, err := CheckCert(fmt.Sprintf("%s:%d", c.Host, c.Port), "")
+	cert, err := CheckCert(c.Addr, c.DNS)
 	c.UpdateStatus = "ok"
 	c.UpdateTime = JSONTime(time.Now())
 
@@ -27,7 +26,7 @@ func (c *Cert) Update() {
 	c.DaysLeft = int(cert.NotAfter.Sub(time.Now()) / (time.Hour * 24))
 }
 
-func CheckCert(addr, customizedIP string) (*x509.Certificate, error) {
+func CheckCert(addr, dns string) (*x509.Certificate, error) {
 	conn, err := tls.Dial("tcp", addr, nil)
 	if err != nil {
 		return nil, err
