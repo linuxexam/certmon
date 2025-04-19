@@ -40,7 +40,8 @@ function cert2tr(cert) {
     trE.innerHTML = `<td>${cert.host}</td>
                     <td>${cert.port}</td>
                     <td>${cert.updateTime}</td>
-                    <td>${cert.daysLeft}</td>`;
+                    <td>${cert.daysLeft}</td>
+                    <td>${cert.updateStatus}</td>`;
 
     return trE;
 }
