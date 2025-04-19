@@ -1,0 +1,51 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+header {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 5px 0 20px 0;
+}
+
+header h1 {
+    font-size: 1.5em;
+    color: gray;
+}
+#sessionInfo {
+    flex-grow: 1;
+}
+#title {
+    flex-grow: 100;
+}
+
+footer {
+    text-align: center;
+    font-size: 0.5em;
+    border-top: 1px solid lightgray;
+    padding: 1em;
+}
+
+
+main {
+    font-family: 'Courier New', Courier, monospace;
+    border-top: 0px solid gray;
+    padding: 0.2em;
+}
+
+#cert-table {
+    border-collapse: collapse;
+    width: 95%;
+    margin: 0 auto;
+}
+#cert-table td {
+    border: lightgray 1px solid;
+    padding: 0em 1em;
+}
+
+.caution {
+    background-color: yellow;
+}
+.warning {
+    background-color: red;
+}
