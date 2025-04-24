@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>certificate monitor</title>
+    <link rel="stylesheet" href="main.css">
+    <script src="index.js"></script>
+</head>
+
+<body>
+    <header>
+        <div id="title">
+            <h1>X509 certificate monitoring tool</h1>
+        </div>
+        <div id="sessionInfo">
+            <span>zhaojon2</span><a href="#">logout</a>
+        </div>
+    </header>
+    <main>
+        <div id="newCertDiv">
+            <form id="frmAddCert">
+                <label>addr</label><input name="certAddr">
+                <label>dns</label><input name="certDNS">
+                <button id="addCert">Add</button>
+            </form>
+        </div>
+        <div>
+            <button id="refresh">refresh</button>
+            <table id="cert-table">
+                <thead>
+                    <tr>
+                        <th>addr</th>
+                        <th>dns</th>
+                        <th>update time</th>
+                        <th>days left</th>
+                        <th>status</th>
+                        <th>action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </main>
+    <footer>
+        CopyLeft@2025
+    </footer>
+</body>
+
+</html>

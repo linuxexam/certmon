@@ -1,4 +1,4 @@
-package main
+package certmon
 
 type User struct {
 	Id    string

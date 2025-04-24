@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"log"
@@ -15,8 +15,7 @@ func TestGetUserCerts(t *testing.T) {
 
 func TestAddUser(t *testing.T) {
 	db := InitDB()
-	err := db.AddUser("user02", "user02@gmail.com")
-	if err != nil {
+	if err := db.AddUserIfNotExits("user02"); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -29,14 +28,6 @@ func TestAddUserCert(t *testing.T) {
 	}
 	if len(db.GetUserCerts("user01")) != 3 {
 		t.Fail()
-	}
-}
-
-func TestDelUserCert(t *testing.T) {
-	db := InitDB()
-	err := db.DelUserCert("user01", "google.ca:443", "")
-	if err != nil {
-		log.Fatal(err)
 	}
 }
 

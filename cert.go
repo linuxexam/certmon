@@ -1,4 +1,4 @@
-package main
+package certmon
 
 import (
 	"crypto/tls"
@@ -7,6 +7,7 @@ import (
 )
 
 type Cert struct {
+	ID           int      `json:"id"`
 	Addr         string   `json:"addr"`
 	DNS          string   `json:"dns"` // for customized DNS resolution, optional
 	UpdateTime   JSONTime `json:"updateTime"`

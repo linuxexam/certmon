@@ -1,8 +1,25 @@
 window.addEventListener('DOMContentLoaded', (ev) => {
     init();
     const refreshE = document.querySelector("#refresh");
-    refreshE.addEventListener("click", (ev)=>{
+    refreshE.addEventListener("click", (ev) => {
         update();
+    });
+    const addCertE = document.querySelector("#addCert");
+    addCertE.addEventListener("click", async (ev) => {
+        ev.preventDefault();
+        const frmAddCert = document.querySelector("#frmAddCert");
+        const formData = new FormData(frmAddCert);
+        try {
+            const response = await fetch("/add", {
+                method: 'POST',
+                body: formData,
+            });
+            const data = await response.text();
+            console.log(data);
+            update();
+        } catch (e) {
+            console.log(e);
+        }
     });
 });
 
@@ -10,6 +27,7 @@ window.addEventListener('DOMContentLoaded', (ev) => {
 const certsJson = `
 [
     {
+        "ID": 12345,
         "addr": "google.ca:443",
         "dns": "",
         "updateTime": "2025-1-10",
@@ -17,6 +35,7 @@ const certsJson = `
         "updateStatus": "ok",
     },
     {
+        "ID": 12346,
         "addr": "1.2.3.4:443",
         "dns": "myexample.com",
         "updateTime": "2025-20-10",
@@ -26,6 +45,17 @@ const certsJson = `
 ]
 `;
 
+async function deleteCert(id){
+    try{
+        const response = await fetch(`/delete?id=${id}`);
+        const data = await response.text();
+        console.log(data);
+        update();
+    }catch(e){
+        console.log(e);
+    }
+}
+
 function cert2tr(cert) {
     const trE = document.createElement("tr");
     if (cert.daysLeft <= 3) {
@@ -33,27 +63,31 @@ function cert2tr(cert) {
     } else if (cert.daysLeft <= 7) {
         trE.className = "caution";
     }
-    trE.innerHTML = `<td>${cert.addr}</td>
+    trE.innerHTML = `<td style="display:none">${cert.id}</td>
+                    <td>${cert.addr}</td>
                     <td>${cert.dns}</td>
                     <td>${cert.updateTime}</td>
                     <td>${cert.daysLeft}</td>
                     <td>${cert.updateStatus}</td>
-                    <td><button onclick="">delete</button></td>`;
+                    <td><button onclick="deleteCert(${cert.id});">delete</button></td>`;
 
     return trE;
 }
 
-function certs2table(certs){
+function certs2table(certs) {
     const tableE = document.querySelector("#cert-table");
     tbodyE = tableE.children[1];
     tbodyE.innerHTML = "";
-    for(let i=0; i<certs.length; i++){
+    if(certs == null){
+        return;
+    }
+    for (let i = 0; i < certs.length; i++) {
         tbodyE.appendChild(cert2tr(certs[i]));
     }
     return tableE;
 }
 
-function certs2csv(certs){
+function certs2csv(certs) {
 
 }
 
@@ -73,12 +107,9 @@ async function fetch_data() {
     }
 }
 
-async function update(){
+async function update() {
     const data = await fetch_data();
     console.log(data);
-    if(data == null){
-        return;
-    }
     update_ui(data);
 }
 

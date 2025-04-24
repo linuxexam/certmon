@@ -1,9 +1,10 @@
-package main
+package data
 
 import (
 	"database/sql"
 	"log"
 
+	"github.com/linuxexam/certmon"
 	_ "modernc.org/sqlite"
 )
 
@@ -23,6 +24,11 @@ func NewDB(dsn string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	_, err = _db.Exec("PRAGMA foreign_keys = ON")
+	if err != nil {
+		return nil, err
+	}
+
 	db.DB = _db
 	// initialize db if not yet
 	sql := `
@@ -39,6 +45,7 @@ func NewDB(dsn string) (*DB, error) {
 		);
 
 		CREATE TABLE IF NOT EXISTS user_cert(
+				id INTEGER PRIMARY KEY,
 				user_id TEXT NOT NULL,
 				cert_id INTEGER NOT NULL,
 				UNIQUE(user_id, cert_id),
@@ -76,9 +83,9 @@ func (db *DB) InsertSampleData() error {
 	return nil
 }
 
-func (db *DB) GetUserCerts(userId string) []*Cert {
+func (db *DB) GetUserCerts(userId string) []*certmon.Cert {
 	sql := `
-	SELECT cert.addr
+	SELECT user_cert.id, cert.addr, cert.dns 
 	FROM user_cert JOIN cert ON user_cert.cert_id = cert.id
 	WHERE user_id = ?
 	`
@@ -92,25 +99,27 @@ func (db *DB) GetUserCerts(userId string) []*Cert {
 		log.Print(err)
 		return nil
 	}
-	var certs []*Cert
+	var certs []*certmon.Cert
 	for rows.Next() {
+		var id int
 		var addr string
-		err := rows.Scan(&addr)
+		var dns string
+		err := rows.Scan(&id, &addr, &dns)
 		if err != nil {
 			log.Print(err)
 			break
 		}
-		certs = append(certs, &Cert{Addr: addr})
+		certs = append(certs, &certmon.Cert{ID: id, Addr: addr, DNS: dns})
 	}
 
 	return certs
 }
 
-func (db *DB) GetAllCerts() []*Cert {
+func (db *DB) GetAllCerts() []*certmon.Cert {
 	return nil
 }
 
-func (db *DB) AddUser(userId, email string) error {
+func (db *DB) UpdateUser(userId, email string) error {
 	_, err := db.Exec(`INSERT INTO user (id, email)
 				VALUES (?,?)
 				ON CONFLICT(id) DO UPDATE SET
@@ -121,9 +130,17 @@ func (db *DB) AddUser(userId, email string) error {
 	}
 	return nil
 }
+func (db *DB) AddUserIfNotExits(userId string) error {
+	_, err := db.Exec(`INSERT OR IGNORE INTO user (id)
+				VALUES (?)`, userId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-func (db *DB) AddCert(addr, dns string) error {
-	_, err := db.Exec(`INSERT INTO cert (addr, dns)
+func (db *DB) AddCertIfNotExits(addr, dns string) error {
+	_, err := db.Exec(`INSERT OR IGNORE INTO cert (addr, dns)
 				VALUES (?,?)`,
 		addr, dns)
 
@@ -134,7 +151,13 @@ func (db *DB) AddCert(addr, dns string) error {
 }
 
 func (db *DB) AddUserCert(userId, certAddr, certDNS string) error {
-	db.AddCert(certAddr, certDNS)
+	log.Printf("%s,%s,%s", userId, certAddr, certDNS)
+	if err := db.AddUserIfNotExits(userId); err != nil {
+		return err
+	}
+	if err := db.AddCertIfNotExits(certAddr, certDNS); err != nil {
+		return err
+	}
 	sql := `
 		INSERT INTO user_cert (user_id, cert_id)
 		VALUES (?,(SELECT id FROM cert WHERE addr = ? and dns = ?))
@@ -143,10 +166,9 @@ func (db *DB) AddUserCert(userId, certAddr, certDNS string) error {
 	return err
 }
 
-func (db *DB) DelUserCert(userId, certAddr, certDNS string) error {
-	sql := `DELETE FROM user_cert
-	WHERE user_id = ? AND 
-		cert_id = (SELECT id from cert WHERE addr = ? and dns = ?)`
-	_, err := db.Exec(sql, userId, certAddr, certDNS)
+// only allow deleting certs owned by the userId
+func (db *DB) DelUserCertById(id int, userId string) error {
+	sql := `DELETE FROM user_cert where id=? and user_id=?`
+	_, err := db.Exec(sql, id, userId)
 	return err
 }
