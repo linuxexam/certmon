@@ -42,7 +42,7 @@ func main() {
 
 	// add a cert for a user
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
-		userId := GetCurrentUserId()
+		userId := GetCurrentUserId(r)
 		err := r.ParseMultipartForm(10 << 20)
 		if err != nil {
 			http.Error(w, "Failed to parse form", http.StatusBadRequest)
@@ -68,7 +68,7 @@ func main() {
 			http.Error(w, "Failed to parse form", http.StatusBadRequest)
 			return
 		}
-		userId := GetCurrentUserId()
+		userId := GetCurrentUserId(r)
 		idUserCert, err := strconv.Atoi(r.FormValue("id"))
 		if err != nil {
 			fmt.Fprintf(w, "Error:%s", err.Error())
@@ -87,7 +87,7 @@ func main() {
 	// get all cert for a user
 	http.HandleFunc("/fetch", func(w http.ResponseWriter, r *http.Request) {
 		// get list of certs registered by the current user
-		certs := db.GetUserCerts(GetCurrentUserId())
+		certs := db.GetUserCerts(GetCurrentUserId(r))
 		// connect to verify each cert
 		var wg sync.WaitGroup
 		wg.Add(len(certs))
