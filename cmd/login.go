@@ -5,8 +5,12 @@ import (
 	"net/http"
 )
 
-func GetCurrentUserId() string {
-	return "user01"
+func GetCurrentUserId(r *http.Request) string {
+	userId, err := GetCurrentUserIdFromHttpHeader(r, "Shib-Proxy-utorid")
+	if err != nil {
+		return ""
+	}
+	return userId
 }
 
 // behind an SP proxy

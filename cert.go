@@ -24,11 +24,14 @@ func (c *Cert) Update() {
 		c.UpdateStatus = err.Error()
 		return
 	}
-	c.DaysLeft = int(cert.NotAfter.Sub(time.Now()) / (time.Hour * 24))
+	c.DaysLeft = int(time.Until(cert.NotAfter) / (time.Hour * 24))
 }
 
 func CheckCert(addr, dns string) (*x509.Certificate, error) {
-	conn, err := tls.Dial("tcp", addr, nil)
+	cfg := &tls.Config{
+		ServerName: dns,
+	}
+	conn, err := tls.Dial("tcp", addr, cfg)
 	if err != nil {
 		return nil, err
 	}
