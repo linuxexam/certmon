@@ -19,10 +19,6 @@ import (
 var UI embed.FS
 var DEBUG = true
 
-func GetCurrentUser() string {
-	return "user01"
-}
-
 func main() {
 	var listen string
 	flag.StringVar(&listen, "listen", ":8080", "listen address and port")
@@ -46,7 +42,7 @@ func main() {
 
 	// add a cert for a user
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
-		userId := GetCurrentUser()
+		userId := GetCurrentUserId()
 		err := r.ParseMultipartForm(10 << 20)
 		if err != nil {
 			http.Error(w, "Failed to parse form", http.StatusBadRequest)
@@ -72,7 +68,7 @@ func main() {
 			http.Error(w, "Failed to parse form", http.StatusBadRequest)
 			return
 		}
-		userId := GetCurrentUser()
+		userId := GetCurrentUserId()
 		idUserCert, err := strconv.Atoi(r.FormValue("id"))
 		if err != nil {
 			fmt.Fprintf(w, "Error:%s", err.Error())
@@ -91,7 +87,7 @@ func main() {
 	// get all cert for a user
 	http.HandleFunc("/fetch", func(w http.ResponseWriter, r *http.Request) {
 		// get list of certs registered by the current user
-		certs := db.GetUserCerts(GetCurrentUser())
+		certs := db.GetUserCerts(GetCurrentUserId())
 		// connect to verify each cert
 		var wg sync.WaitGroup
 		wg.Add(len(certs))
