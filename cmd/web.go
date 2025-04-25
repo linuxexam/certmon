@@ -40,6 +40,11 @@ func main() {
 		}
 	})
 
+	http.HandleFunc("/userid", func(w http.ResponseWriter, r *http.Request) {
+		userId := GetCurrentUserId(r)
+		fmt.Fprintf(w, "%s", userId)
+	})
+
 	// add a cert for a user
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
 		userId := GetCurrentUserId(r)

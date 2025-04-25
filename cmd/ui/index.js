@@ -114,5 +114,14 @@ async function update() {
 }
 
 async function init() {
+    // get userId
+    try {
+        const response = await fetch("./userid");
+        const userId = await response.text();
+        document.getElementById("userId").innerText = userId;
+
+    }catch(e){
+        console.log(e);
+    }
     update();
 }
