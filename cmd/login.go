@@ -6,7 +6,7 @@ import (
 )
 
 func GetCurrentUserId(r *http.Request) string {
-	userId, err := GetCurrentUserIdFromHttpHeader(r, "Shib-Proxy-utorid")
+	userId, err := GetCurrentUserIdFromHttpHeader(r, "UTSSO-Proxy-utorid")
 	if err != nil {
 		return ""
 	}

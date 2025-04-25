@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/x509"
 	"embed"
 	"encoding/json"
 	"flag"
@@ -8,7 +9,9 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/linuxexam/certmon"
@@ -17,15 +20,34 @@ import (
 
 //go:embed ui
 var UI embed.FS
-var DEBUG = true
+var DEBUG = false
 
 func main() {
 	var listen string
+	var dataDir string
+	var rootCAFile string
+
 	flag.StringVar(&listen, "listen", ":8080", "listen address and port")
+	flag.StringVar(&dataDir, "dataDir", ".", "directory for saving data")
+	flag.StringVar(&rootCAFile, "rootCAs", "", "PEM file containing root CAs")
+
 	flag.Parse()
 
+	var rootCAs *x509.CertPool
+
+	if rootCAFile != "" {
+		rootCAs = x509.NewCertPool()
+		pemBytes, err := os.ReadFile(rootCAFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if ok := rootCAs.AppendCertsFromPEM(pemBytes); !ok {
+			panic("failed to parse root certs")
+		}
+	}
+
 	// db
-	db, err := data.NewDB("./certmon.sqlite")
+	db, err := data.NewDB(strings.TrimSuffix(dataDir, "/") + "/certmon.sqlite")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -99,7 +121,7 @@ func main() {
 		for _, cert := range certs {
 			go func(cert *certmon.Cert) {
 				defer wg.Done()
-				cert.Update()
+				cert.Update(rootCAs)
 			}(cert)
 		}
 		wg.Wait()

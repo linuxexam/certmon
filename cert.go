@@ -15,8 +15,8 @@ type Cert struct {
 	UpdateStatus string   `json:"updateStatus"`
 }
 
-func (c *Cert) Update() {
-	cert, err := CheckCert(c.Addr, c.DNS)
+func (c *Cert) Update(rootCAs *x509.CertPool) {
+	cert, err := CheckCert(c.Addr, c.DNS, rootCAs)
 	c.UpdateStatus = "ok"
 	c.UpdateTime = JSONTime(time.Now())
 
@@ -27,9 +27,10 @@ func (c *Cert) Update() {
 	c.DaysLeft = int(time.Until(cert.NotAfter) / (time.Hour * 24))
 }
 
-func CheckCert(addr, dns string) (*x509.Certificate, error) {
+func CheckCert(addr, dns string, rootCAs *x509.CertPool) (*x509.Certificate, error) {
 	cfg := &tls.Config{
 		ServerName: dns,
+		RootCAs:    rootCAs,
 	}
 	conn, err := tls.Dial("tcp", addr, cfg)
 	if err != nil {
