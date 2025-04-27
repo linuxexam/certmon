@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -125,6 +126,11 @@ func main() {
 			}(cert)
 		}
 		wg.Wait()
+
+		// sort certs by daysLeft
+		slices.SortFunc(certs, func(a, b *certmon.Cert) int {
+			return a.DaysLeft - b.DaysLeft
+		})
 
 		buf, err := json.Marshal(certs)
 		if err != nil {
