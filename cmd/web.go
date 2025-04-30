@@ -76,14 +76,14 @@ func main() {
 			http.Error(w, "Failed to parse form", http.StatusBadRequest)
 			return
 		}
-		certAddr := r.FormValue("certAddr")
-		certDNS := r.FormValue("certDNS")
+		certAddr := strings.Trim(r.FormValue("certAddr"), " \t\r\n")
+		certDNS := strings.Trim(r.FormValue("certDNS"), " \t\r\n")
 
 		log.Print(r.Form)
 
 		err = db.AddUserCert(userId, certAddr, certDNS)
 		if err != nil {
-			log.Print(err)
+			log.Print(err.Error())
 			w.Write([]byte(err.Error()))
 		}
 		w.Write([]byte("good"))
@@ -100,14 +100,14 @@ func main() {
 		idUserCert, err := strconv.Atoi(r.FormValue("id"))
 		if err != nil {
 			fmt.Fprintf(w, "Error:%s", err.Error())
-			log.Print(err)
+			log.Print(err.Error())
 			return
 		}
 
 		err = db.DelUserCertById(idUserCert, userId)
 		if err != nil {
 			fmt.Fprintf(w, "Error:%s", err.Error())
-			log.Print(err)
+			log.Print(err.Error())
 			return
 		}
 	})
@@ -122,6 +122,7 @@ func main() {
 		for _, cert := range certs {
 			go func(cert *certmon.Cert) {
 				defer wg.Done()
+				log.Printf("checking cert at %s(%s)...", cert.Addr, cert.DNS)
 				cert.Update(rootCAs)
 			}(cert)
 		}
@@ -138,7 +139,7 @@ func main() {
 			return
 		}
 		if _, err := w.Write(buf); err != nil {
-			log.Print(err)
+			log.Print(err.Error())
 		}
 	})
 

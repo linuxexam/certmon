@@ -2,7 +2,6 @@ package certmon
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 )
@@ -14,7 +13,6 @@ const timeLayout = time.DateTime
 func (jt JSONTime) MarshalJSON() ([]byte, error) {
 	t := time.Time(jt)
 	s := fmt.Sprintf(`"%s"`, t.Format(timeLayout))
-	log.Println(s)
 	return []byte(s), nil
 }
 
