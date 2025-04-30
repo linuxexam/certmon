@@ -3,6 +3,7 @@ package certmon
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"net"
 	"time"
 )
 
@@ -32,7 +33,11 @@ func CheckCert(addr, dns string, rootCAs *x509.CertPool) (*x509.Certificate, err
 		ServerName: dns,
 		RootCAs:    rootCAs,
 	}
-	conn, err := tls.Dial("tcp", addr, cfg)
+
+	dialer := &net.Dialer{
+		Timeout: time.Second * 10,
+	}
+	conn, err := tls.DialWithDialer(dialer, "tcp", addr, cfg)
 	if err != nil {
 		return nil, err
 	}
