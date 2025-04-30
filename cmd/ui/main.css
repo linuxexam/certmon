@@ -57,3 +57,7 @@ button {
 #newCertDiv {
     padding-bottom: 1em;
 }
+
+label {
+    padding: 0.2em;
+}
